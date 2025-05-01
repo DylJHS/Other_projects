@@ -5,10 +5,8 @@ date: "2025-04-30"
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+# knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_knit$set(root.dir = "D:/projects/Other")
-setwd("D:/projects/Other")
-print(getwd())
 ```
 
 
@@ -23,9 +21,29 @@ library(tools)
 library(readr)
 ```
 
+```{r}
+# Define the genes of interest
+goi <- c(
+  "PRDM2", "ZNF584", "C5orf24", "SP140L", "SCMH1", "CBX4", 
+  "SMARCAL1", "TEAD3", "PRDM10", "ZNF219", "ZNF644", "ZNF384"
+)
+
+# Define the controls
+cntrls <- c("POGZ", "MPHOSPH8")
+
+all_interest <- c(goi, cntrls)
+
+# Set the pvalue cutoff
+p_val_cutoff <- 0.05
+
+# Set the fold change cutoff
+fc_cutoff <- 1.5
+
+```
+
 # Load the data
 ```{r}
-data_name <- "Other/data/SummaryData_Volcanoplot__CBX1.T_vs_NLS.T_noRibosome.txt"
+data_name <- "data/SummaryData_Volcanoplot__CBX1.T_vs_NLS.T_noRibosome.txt"
 
 # Check that the data file exists
 if (!file.exists(data_name)) {
@@ -36,51 +54,103 @@ if (!file.exists(data_name)) {
 suffix <- tools::file_ext(data_name)
 # Load the data based on the file type
 if (suffix == "csv"){
-       data <- read.csv(data_name, header = TRUE)
+       ori_data <- read.csv(data_name, header = TRUE)
        } else if (suffix == "txt"){
-       data <- read_delim(data_name, delim = "\t", col_names = TRUE, show_col_types = FALSE)
+       ori_data <- read_delim(data_name, delim = "\t", col_names = TRUE, show_col_types = FALSE)
 }
 
 ```
 
-# Keep only relevant columns
+# Configure the data
 ```{r}
 # Set the columns to keep
 keep_columns <- c(
-  c("Gene.names", "pvalue.-log10", "FoldChange"), 
-  names(select(data, starts_with("CBX"))), 
-  names(select(data, starts_with("NLS")))
+  c("Gene.names", "p_value", "FoldChange"), 
+  names(select(ori_data, starts_with("CBX"))), 
+  names(select(ori_data, starts_with("NLS")))
 )
 
 # Reduce data based on the cols to keep
-data <- data %>%
-  select(all_of(keep_columns)) 
+data <- ori_data %>%
+  mutate(
+    p_value = 10^(-ori_data$`pvalue.-log10`)
+    ) %>% 
+  select(
+    all_of(keep_columns)
+    ) 
+
+# order the data 
+gene_flags <- data$Gene.names %in% goi | 
+  data$Gene.names %in% cntrls
+data <- rbind(
+  data[!(gene_flags), ],
+  data[gene_flags, ]
+  )
+
+# Identify all significant genes
+significant_genes <- data %>%
+  filter(
+    p_value <= p_val_cutoff & abs(FoldChange) >= fc_cutoff
+  ) %>% 
+  pull(Gene.names)
+
+# Map colours: red for genes of interest, grey otherwise
+keyvals.colour <- ifelse(data$Gene.names %in% goi, '#920000',
+                         ifelse(data$Gene.names %in% cntrls, '#0000FF',
+                                ifelse(data$Gene.names %in% significant_genes, '#09622A', 'grey')
+                                )
+                         )
+    
+names(keyvals.colour) <- ifelse(data$Gene.names %in% goi, 'Gene of Interest',
+                               ifelse(data$Gene.names %in% cntrls, 'Control',
+                                      ifelse(data$Gene.names %in% significant_genes, 'Significant', 'Other')
+                                      )
+                               )
+    
+# Map sizes: 4 for genes of interest, 1 for others
+keyvals.size <- ifelse(
+  data$Gene.names %in% all_interest, 3, 1.5
+    )
+
+names(keyvals.size) <- ifelse(
+  data$Gene.names %in% goi, 'Gene of Interest', 
+  ifelse(data$Gene.names %in% cntrls, 'Control', 'Other')
+)
 ```
 
-# Preprare for the loop 
-```{r}
-# Get the  time points
-time_points <- names(select(data, starts_with("CBX"))) %>%
-  strsplit("_") %>%
-  sapply(tail, 1)
 
-# Get the number of time points
-num_tps <- unique(time_points) %>% sapply(., integer())
-```
 # Loop over the time points
 ```{r}
-# Loop
-for (time in time_points) {
-  cat("Processing time point:", time, "\n")
-  # Reduce the data to the time point
-  sub_data <- data %>% 
-    select(
-     "Gene.names", 
-     "pvalue.-log10", 
-     "FoldChange", 
-     ends_with(time)
-     )
-}
+
+# Volcano plot
+vol_plt <- EnhancedVolcano(
+  data,
+  lab = ifelse(data$Gene.names %in% all_interest, data$Gene.names, ""),
+  selectLab = all_interest,
+  x = 'FoldChange',
+  y = 'p_value',
+  ylim =  c(0, max(-log10(data$p_value), na.rm = TRUE) + 1),
+  xlim = c(min(data$FoldChange, na.rm = TRUE) - 0.5, max(data$FoldChange, na.rm = TRUE) +
+    0.5),
+  # subtitle = signif,
+  pCutoff = p_val_cutoff,
+  FCcutoff = fc_cutoff,
+  # title = paste0("Volcano plot for time point: ", time),
+  colCustom = keyvals.colour,
+  pointSize = keyvals.size,
+  caption = paste0("total = ", nrow(data), " genes"),
+  # legendPosition = "none",
+  drawConnectors = TRUE,
+  widthConnectors = 0.45,
+  colConnectors = 'black',
+  arrowheads = FALSE,
+  
+)
+  
+  
+  
+  
+
 ```
 
 

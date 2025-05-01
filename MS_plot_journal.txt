@@ -24,4 +24,5 @@
 	* highlight genes of interest with label
 	* highlight control genes in diff colour
 	
-	
+- The genes of interest include: "PRDM2", "ZNF584", "C5orf24", "SP140L", "SCMH1", "CBX4", "SMARCAL1", "TEAD3", "PRDM10", "ZNF219", "ZNF644", "ZNF384"
+- FoldChange values in the dataset are calculated as the difference in mean intensities between the CBX1 and NLS conditions
