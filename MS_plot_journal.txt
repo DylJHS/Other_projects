@@ -1,0 +1,27 @@
+30/04/25
+- Going over the specs that adi requested
+- Different time points in CBX vs NLS
+- plots will be created by time point
+- Columns that are needed are: 
+	* all NLS, CBX time points 
+	* -log10pval 
+	* foldchange
+	* Gene names
+- Plots do not need to be facetted or wrapped
+
+
+01/05/25
+- Requirements are: 
+	* R script
+	* Plots in pdf format
+	* X-axis: log2 fold change.
+	* Y-axis: -log10 p-value
+	* Label and highlight: NLS on the left side. CBX1 on the right side.
+	* Both in bold and a distinct colour.
+	* dotted lines for FC & pval cutoffs
+	* highlight thresholded points in one colour
+	* highlight genes of interest in another colour
+	* highlight genes of interest with label
+	* highlight control genes in diff colour
+	
+	

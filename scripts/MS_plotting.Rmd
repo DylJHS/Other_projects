@@ -1,0 +1,87 @@
+---
+title: "Adi_MS_plot"
+output: html_document
+date: "2025-04-30"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "D:/projects/Other")
+setwd("D:/projects/Other")
+print(getwd())
+```
+
+
+
+# Load the packages
+```{r}
+library(ggplot2)
+library(EnhancedVolcano)
+library(dplyr)
+library(tidyr)
+library(tools)
+library(readr)
+```
+
+# Load the data
+```{r}
+data_name <- "Other/data/SummaryData_Volcanoplot__CBX1.T_vs_NLS.T_noRibosome.txt"
+
+# Check that the data file exists
+if (!file.exists(data_name)) {
+  stop("Data file does not exist.")
+}
+
+# get the extension type
+suffix <- tools::file_ext(data_name)
+# Load the data based on the file type
+if (suffix == "csv"){
+       data <- read.csv(data_name, header = TRUE)
+       } else if (suffix == "txt"){
+       data <- read_delim(data_name, delim = "\t", col_names = TRUE, show_col_types = FALSE)
+}
+
+```
+
+# Keep only relevant columns
+```{r}
+# Set the columns to keep
+keep_columns <- c(
+  c("Gene.names", "pvalue.-log10", "FoldChange"), 
+  names(select(data, starts_with("CBX"))), 
+  names(select(data, starts_with("NLS")))
+)
+
+# Reduce data based on the cols to keep
+data <- data %>%
+  select(all_of(keep_columns)) 
+```
+
+# Preprare for the loop 
+```{r}
+# Get the  time points
+time_points <- names(select(data, starts_with("CBX"))) %>%
+  strsplit("_") %>%
+  sapply(tail, 1)
+
+# Get the number of time points
+num_tps <- unique(time_points) %>% sapply(., integer())
+```
+# Loop over the time points
+```{r}
+# Loop
+for (time in time_points) {
+  cat("Processing time point:", time, "\n")
+  # Reduce the data to the time point
+  sub_data <- data %>% 
+    select(
+     "Gene.names", 
+     "pvalue.-log10", 
+     "FoldChange", 
+     ends_with(time)
+     )
+}
+```
+
+
+
