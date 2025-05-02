@@ -1,2 +1,24 @@
-*.csv 
 data/ 
+
+
+# Ignore image files
+*.png
+*.jpg
+*.jpeg
+*.tiff
+*.bmp
+*.gif
+*.svg
+*.pdf
+
+# Ignore spreadsheet and tabular data files
+*.csv
+*.tsv
+*.xls
+*.xlsx
+*.ods
+
+# Optional: ignore temporary or backup files
+*.tmp
+*.bak
+*~
