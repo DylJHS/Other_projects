@@ -51,6 +51,9 @@ fc_cutoff <- 0.25
 #######################################################################################
 ### CAN IGNORE THE REST
 #######################################################################################
+# Set the working directory to the location of this script
+this_file <- normalizePath(sys.frame(1)$ofile)
+setwd(dirname(this_file))
 
 # Load the data
 # Check that the data file exists
@@ -146,11 +149,12 @@ vol_plt <- EnhancedVolcano(
   subtitle = "",
   pCutoff = p_val_cutoff,
   FCcutoff = fc_cutoff,
-  title = paste0("Volcano plot: ", cond_1, " vs ", cond_2),
+  title = paste0("Differential Protein Abundance: ", cond_1, " vs ", cond_2),
   colCustom = keyvals.colour,
   pointSize = keyvals.size,
   caption = paste0("total = ", nrow(data), " genes"),
   legendPosition = "right",
+  legendLabSize = 12,
   drawConnectors = TRUE,
   widthConnectors = 0.45,
   colConnectors = 'black',
@@ -175,10 +179,10 @@ vol_plt <- vol_plt +
 
 # Save as pdf
 ggsave(
-  filename = "log2FC_volcano_plot.pdf",
+  filename = paste(cond_1, cond_2, "volcano_plot.pdf", sep = "_"),
   plot = vol_plt,
   device = "pdf",
-  width = 10,
+  width = 12,
   height = 8,
   dpi = 300
 )

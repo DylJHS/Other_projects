@@ -26,3 +26,10 @@
 	
 - The genes of interest include: "PRDM2", "ZNF584", "C5orf24", "SP140L", "SCMH1", "CBX4", "SMARCAL1", "TEAD3", "PRDM10", "ZNF219", "ZNF644", "ZNF384"
 - FoldChange values in the dataset are calculated as the difference in mean intensities between the CBX1 and NLS conditions
+
+
+02/05/25
+- Script calculates the log2FC bsaed on the mean of the cbx1 and nls columns 
+- Uses the log2FC as the x axis foldchange
+- Plot is saved as pdf
+
