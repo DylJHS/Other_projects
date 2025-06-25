@@ -33,3 +33,16 @@
 - Uses the log2FC as the x axis foldchange
 - Plot is saved as pdf
 
+25/06/25
+- Issues with the script were observed
+- It calculates the log2 fold change using the means fo the replicates from each group but the replicate values are already in log2 form
+- Furthermore, the analysis was already performed using a dedicated model (file:///C:/Users/dhaynessimmons/Downloads/RMD_Volcano_PD_noRibosome%20(1).html)
+- Requested modifications: 
+	- Update X-axis (log₂ fold change):Use correct fold change values showing higher enrichment (as seen in the HTML plot).
+	- Split screen hits into two categories: In cellulo hits (PRDM2, ZNF584, C5orf24, SP140L, SCMH1, CBX4) Use one fill colour + bold/bright border; In vitro hits (ZNF384, TEAD3, ZNF219, SMARCAL1, PRDM10) Use a different fill colour, same border style. Both sets should be labelled and distinguished in the legend.
+	- Update control genes: Add ZNF644 to the control set (blue dot). Add CBX1 to the control set.
+	- New category: Known interactors (MIS12, TRIM28, EHMT2, SETDB1, ADNP2, LBR) Highlight and label the following with a new colour: Include as a separate legend entry: “Known interactors”.
+- no border parameter for the points in EnhancedVolcano so slight change of colour between goi_cellulo and goi_vitro
+- updated the plot to inclue the changes
+
+

@@ -28,19 +28,26 @@ cond_1 <- "CBX1"
 cond_2 <- "NLS"
 
 # Define the genes of interest
-goi <- c(
-  "PRDM2", "ZNF584", "C5orf24", "SP140L", "SCMH1", "CBX4", 
-  "SMARCAL1", "TEAD3", "PRDM10", "ZNF219", "ZNF644", "ZNF384"
+goi_cellulo <- c(
+  "PRDM2", "ZNF584", "C5orf24", "SP140L", "SCMH1", "CBX4"
+)
+goi_vitro <- c(
+  "ZNF384", "TEAD3", "ZNF219", "SMARCAL1", "PRDM10"
 )
 
 # Define the controls
-cntrls <- c("POGZ", "MPHOSPH8")
+cntrls <- c("POGZ", "MPHOSPH8", "ZNF644", "CBX1")
+
+# Define the known interactors
+interactors <- c(
+  "MIS12", "TRIM28", "EHMT2", "SETDB1", "ADNP2", "LBR"
+)
 
 # Set the pvalue cutoff
 p_val_cutoff <- 0.05
 
 # Set the log 2 fold change cutoff
-fc_cutoff <- 0.25
+fc_cutoff <- 2.5
 
 #######################################################################################
 #######################################################################################
@@ -71,7 +78,7 @@ if (suffix == "csv"){
 }
 
 # Configure the data
-all_interest <- c(goi, cntrls)
+all_interest <- c(goi_cellulo, goi_vitro, interactors, cntrls)
 
 # Set the columns to keep
 keep_columns <- c(
@@ -85,8 +92,8 @@ data <- ori_data %>%
   mutate(p_value = 10^(-ori_data$`pvalue.-log10`)) %>% 
   rowwise() %>% 
   mutate(
-    log2FC = log2(mean(c_across(starts_with(cond_1))) / mean(c_across(starts_with(cond_2))))
-  ) %>% 
+    log2FC = FoldChange
+  )%>% 
   ungroup() %>%
   select(
     all_of(keep_columns)
@@ -96,8 +103,10 @@ data <- ori_data %>%
 data[2:ncol(data)] <- lapply(data[2:ncol(data)], function(x) as.numeric(as.character(x)))
 
 # order the data 
-gene_flags <- data$Gene.names %in% goi | 
-  data$Gene.names %in% cntrls
+gene_flags <- data$Gene.names %in% goi_cellulo | 
+  data$Gene.names %in% cntrls |
+  data$Gene.names %in% interactors |
+  data$Gene.names %in% goi_vitro
 data <- rbind(
   data[!(gene_flags), ],
   data[gene_flags, ]
@@ -110,28 +119,34 @@ significant_genes <- data %>%
   ) %>% 
   pull(Gene.names)
 
-# Map colours: red for genes of interest, grey otherwise
-keyvals.colour <- ifelse(data$Gene.names %in% goi, '#920000',
-                         ifelse(data$Gene.names %in% cntrls, '#0000FF',
-                                ifelse(data$Gene.names %in% significant_genes, '#09622A', 'grey')
+# Map colours
+keyvals.colour <- ifelse(data$Gene.names %in% goi_cellulo, '#9C0824',
+                         ifelse(data$Gene.names %in% goi_vitro, '#FA9081',
+                                ifelse(data$Gene.names %in% interactors, '#FF7F00',
+                                       ifelse(data$Gene.names %in% cntrls, '#0000FF',
+                                              ifelse(data$Gene.names %in% significant_genes, '#09622A', 'grey')
+                                       )
+                                )
                          )
 )
 
-names(keyvals.colour) <- ifelse(data$Gene.names %in% goi, 'Gene of Interest',
-                                ifelse(data$Gene.names %in% cntrls, 'Control',
-                                       ifelse(data$Gene.names %in% significant_genes, 'Significant', 'Not Significant')
+names(keyvals.colour) <- ifelse(data$Gene.names %in% goi_cellulo, 'Gene of Interest (In Cellulo)',
+                                ifelse(data$Gene.names %in% goi_vitro, 'Gene of Interest (In Vitro)',
+                                       ifelse(data$Gene.names %in% interactors, 'Known Interactor',
+                                              ifelse(data$Gene.names %in% cntrls, 'Control',
+                                                     ifelse(data$Gene.names %in% significant_genes, 'Significant Gene', 'Other')
+                                              )
+                                       )
                                 )
 )
 
-# Map sizes: 4 for genes of interest, 1 for others
+
+
+# Map sizes
 keyvals.size <- ifelse(
   data$Gene.names %in% all_interest, 3, 1.5
 )
 
-names(keyvals.size) <- ifelse(
-  data$Gene.names %in% goi, 'Gene of Interest', 
-  ifelse(data$Gene.names %in% cntrls, 'Control', 'Other')
-)
 
 # Volcano plot
 xmin <- min(data$log2FC, na.rm = TRUE) - 0.5
@@ -186,3 +201,5 @@ ggsave(
   height = 8,
   dpi = 300
 )
+
+rm(list = ls())
