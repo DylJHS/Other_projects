@@ -45,4 +45,7 @@
 - no border parameter for the points in EnhancedVolcano so slight change of colour between goi_cellulo and goi_vitro
 - updated the plot to inclue the changes
 
+26/06/25
+- Changed the log2FC to 4
+
 

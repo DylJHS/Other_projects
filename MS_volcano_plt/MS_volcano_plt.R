@@ -47,7 +47,7 @@ interactors <- c(
 p_val_cutoff <- 0.05
 
 # Set the log 2 fold change cutoff
-fc_cutoff <- 2.5
+fc_cutoff <- 4
 
 #######################################################################################
 #######################################################################################
@@ -130,8 +130,8 @@ keyvals.colour <- ifelse(data$Gene.names %in% goi_cellulo, '#9C0824',
                          )
 )
 
-names(keyvals.colour) <- ifelse(data$Gene.names %in% goi_cellulo, 'Gene of Interest (In Cellulo)',
-                                ifelse(data$Gene.names %in% goi_vitro, 'Gene of Interest (In Vitro)',
+names(keyvals.colour) <- ifelse(data$Gene.names %in% goi_cellulo, 'Gene of Interest (In cellulo)',
+                                ifelse(data$Gene.names %in% goi_vitro, 'Gene of Interest (In vitro)',
                                        ifelse(data$Gene.names %in% interactors, 'Known Interactor',
                                               ifelse(data$Gene.names %in% cntrls, 'Control',
                                                      ifelse(data$Gene.names %in% significant_genes, 'Significant Gene', 'Other')
@@ -188,7 +188,7 @@ vol_plt <- vol_plt +
     color = c("#A4365E", "#4A3D8D"),
   ) +
   theme(
-    plot.title = element_text(hjust = 0.5, size = 20, face = "bold"),
+    plot.title = element_text(hjust = 0.5, size = 20, face = "italic"),
     plot.subtitle = element_text(hjust = 0.5, size = 16)
   )
 
@@ -197,7 +197,7 @@ ggsave(
   filename = paste(cond_1, cond_2, "volcano_plot.pdf", sep = "_"),
   plot = vol_plt,
   device = "pdf",
-  width = 12,
+  width = 14,
   height = 8,
   dpi = 300
 )
